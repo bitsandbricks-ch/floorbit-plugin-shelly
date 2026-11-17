@@ -55,7 +55,8 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install -r floorbit/requirements.txt pytest ruff
-      - run: ruff check --config floorbit/pyproject.toml plugin
+      # Floorbit is a dependency here; its own config would sort it as first-party.
+      - run: ruff check --config floorbit/pyproject.toml --config 'lint.isort.known-third-party=["floorbit"]' plugin
       - name: Tests
         working-directory: plugin
         env:
