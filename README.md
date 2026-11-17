@@ -21,7 +21,7 @@ Settings > Plugins > Marketplace; what it does and how to set it up is in Floorb
 git clone https://github.com/bitsandbricks-ch/floorbit ../floorbit
 git -C ../floorbit checkout "$(cat FLOORBIT_REF)"
 pip install -r ../floorbit/requirements.txt pytest ruff
-ruff check --config ../floorbit/pyproject.toml .
+ruff check --config ../floorbit/pyproject.toml --config 'lint.isort.known-third-party=["floorbit"]' .
 PYTHONPATH=../floorbit python -m pytest -q tests
 ```
 

@@ -17,8 +17,6 @@ name: Test and release
 # (not an organisation or repository secret, which every job could read), and
 # that job runs no third-party action and no npm, only the plugin from git and
 # Floorbit's own tools at FLOORBIT_REF.
-#   FLOORBIT_READ_TOKEN  only while bitsandbricks-ch/floorbit is private: a
-#                        token that can read it (Contents: read)
 #   MARKETPLACE_TOKEN    optional: may send a repository_dispatch to
 #                        floorbit-plugins, so the index updates at once
 on:
@@ -49,7 +47,6 @@ jobs:
           repository: bitsandbricks-ch/floorbit
           ref: ${{ steps.ref.outputs.sha }}
           path: floorbit
-          token: ${{ secrets.FLOORBIT_READ_TOKEN || github.token }}
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
@@ -92,7 +89,6 @@ jobs:
           repository: bitsandbricks-ch/floorbit
           ref: ${{ needs.test.outputs.floorbit }}
           path: floorbit
-          token: ${{ secrets.FLOORBIT_READ_TOKEN || github.token }}
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:

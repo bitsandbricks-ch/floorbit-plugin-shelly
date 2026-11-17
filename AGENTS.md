@@ -16,7 +16,7 @@ hall). The [README](README.md) says how it is tested and released.
 1. **Branch:** work on your own branch, never push to `main`. One topic per branch and pull request.
 2. **Before you push**, run what CI runs and make it pass locally, with Floorbit checked out next to
    this repository at the commit in `FLOORBIT_REF`:
-   - `ruff check --config ../floorbit/pyproject.toml .`
+   - `ruff check --config ../floorbit/pyproject.toml --config 'lint.isort.known-third-party=["floorbit"]' .`
    - `PYTHONPATH=../floorbit python -m pytest -q tests`
 3. **Pull request:** open it as a **draft** and fill in the template
    (`.github/pull_request_template.md`). Link the issue.
