@@ -74,3 +74,60 @@ def test_shelly_reads_sends_and_stops_trying_a_refused_password(fake):
     assert plugin.tick()[0] == []                       # still blocked
     plugin.rev = "r2"                                   # the password was changed
     assert plugin.tick()[0][0]["watts"] == 1
+
+
+def test_shelly_odd_answers_are_no_reading(fake):
+    m = load("agent")
+    for odd in ([], 5, "x", None, {"meters": 5}, {"emeters": "ab"}, {"meters": [{"power": float("nan")}]},
+                {"meters": [{"power": True}]}):
+        assert m.watts_from_status(odd) is None and m.watts_from_rpc(odd) is None
+    assert m.watts_from_rpc({"switch:0": {"apower": float("inf")}}) is None
+    assert m.watts_from_status({"meters": [{"power": 1}]}, "-1") is None
+    # A device that answers NaN, or a list: a failed meter, not a stopped round.
+    Fake.routes = {"/rpc/Shelly.GetStatus": (200, {"switch:0": {"apower": float("nan")}})}
+    ctx = MemoryContext("shelly", {}, {"sends": {"readings": {"privacy": "device", "latest": True}}})
+    plugin = m.AgentPlugin(ctx)
+    plugin.devices, plugin.rev = m.parse_devices(f"db1-1 = {fake}"), "r1"
+    assert plugin.tick() == ([], [f"db1-1: {fake} has no power reading"])
+    Fake.routes = {"/rpc/Shelly.GetStatus": (200, [])}
+    assert plugin.tick()[0] == []
+
+
+def test_a_round_that_breaks_does_not_stop_the_readings(monkeypatch):
+    m = load("agent")
+    ctx = MemoryContext("shelly", {}, {"sends": {}})
+    agent = m.AgentPlugin(ctx)
+    agent.interval = 0
+    rounds = []
+
+    def tick():
+        rounds.append(1)
+        if len(rounds) == 1:
+            raise KeyError("surprise")
+        ctx.stopping.set()
+
+    monkeypatch.setattr(agent, "tick", tick)
+    agent.loop()
+    assert len(rounds) == 2
+    assert any("a round failed" in e["error"] for e in ctx.health_.report()["errors"])
+
+
+def test_a_meter_address_that_is_no_web_server():
+    import socket
+    m = load("agent")
+    server = socket.socket()
+    server.bind(("127.0.0.1", 0))
+    server.listen()
+
+    def answer():
+        conn, _addr = server.accept()
+        conn.recv(1000)
+        conn.sendall(b"SSH-2.0-OpenSSH_9.6\r\n")
+        conn.close()
+    threading.Thread(target=answer, daemon=True).start()
+    ctx = MemoryContext("shelly", {}, {"sends": {}})
+    plugin = m.AgentPlugin(ctx)
+    plugin.devices, plugin.rev = [("db1-1", f"127.0.0.1:{server.getsockname()[1]}", None)], "r1"
+    readings, failed = plugin.tick()
+    server.close()
+    assert readings == [] and failed[0].startswith("db1-1: ")

@@ -3,6 +3,13 @@
 Each release has a section `## <version>`; its text becomes the GitHub release notes and the
 Marketplace's "what's new".
 
+## 1.0.1
+
+- Keeps reading for the whole event when a round goes wrong. A meter that answers NaN, a list or
+  something that isn't JSON, or something that isn't a web server at a meter's address, used to stop
+  the reading until the agent restarted; now that meter shows as failing and the others are read.
+- A reading of NaN, infinity or `true` is no reading, and channel `-1` is refused.
+
 ## 1.0.0
 
 - First release from its own repository. Until now the plugin shipped inside Floorbit; it works
