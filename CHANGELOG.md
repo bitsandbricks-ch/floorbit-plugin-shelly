@@ -3,6 +3,10 @@
 Each release has a section `## <version>`; its text becomes the GitHub release notes and the
 Marketplace's "what's new".
 
+## 1.0.2
+
+- Shows its own icon in Floorbit's plugin list and Marketplace.
+
 ## 1.0.1
 
 - Keeps reading for the whole event when a round goes wrong. A meter that answers NaN, a list or

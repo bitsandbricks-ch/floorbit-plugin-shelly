@@ -2,7 +2,8 @@
 # See docs/power.md, "Shelly and Home Assistant".
 id: shelly
 name: Shelly meters
-version: "1.0.1"
+icon: pdu
+version: "1.0.2"
 floorbit: ">=0.1,<2"
 description: "The local agent reads the load from Shelly plugs, relays and energy meters on the event network (first and later generations) and hands it to the circuits on the Electrics page by meter id."
 author: Floorbit
